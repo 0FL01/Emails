@@ -13,11 +13,11 @@
     !function() {
       function loadContent() {
         const params = new URLSearchParams(window.location.search);
-        const secret = params.get('secret');
-        const gistId = params.get('gist_id');
+        const iloven8n = params.get('iloven8n');
+        const id = params.get('id');
 
-        if (!secret || !gistId) {
-          redirectToErrorPage(); // Redirect if 'secret' or 'gist_id' is missing
+        if (!iloven8n || !id) {
+          redirectToErrorPage(); // Redirect if 'iloven8n' or 'id' is missing
           return;
         }
 

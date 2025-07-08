@@ -14,23 +14,20 @@
       document.addEventListener('DOMContentLoaded', () => {
         const params = new URLSearchParams(window.location.search);
         const id = params.get('id');
-        const provider = params.get('provider'); // Наш новый параметр
+        const provider = params.get('provider'); 
 
         if (!id) {
-          redirectToErrorPage();
+          redirectToErrorPage(); 
           return;
         }
 
         let apiUrl;
-        // Определяем, к какому API обращаться
         if (provider === 'gitlab') {
-          // URL для получения сырого контента сниппета GitLab
-          apiUrl = `https://gitlab.com/api/v4/snippets/${id}/raw`;
-          fetchContent(apiUrl, 'text'); // GitLab raw API отдает просто текст
+          apiUrl = `https://gitlab.com/-/snippets/${id}/raw/main/email.html`;
+          fetchContent(apiUrl, 'text'); 
         } else {
-          // Старая логика для GitHub
           apiUrl = `https://api.github.com/gists/${id}`;
-          fetchContent(apiUrl, 'json'); // GitHub API отдает JSON
+          fetchContent(apiUrl, 'json'); 
         }
       });
 
@@ -38,25 +35,22 @@
         fetch(url)
           .then(response => {
             if (!response.ok) throw new Error('Network response was not ok');
-            if (responseType === 'json') return response.json();
-            return response.text();
+            return responseType === 'json' ? response.json() : response.text();
           })
           .then(data => {
             let content;
             if (responseType === 'json') {
-              // Логика для GitHub Gist
               const fileName = Object.keys(data.files)[0];
               content = data.files[fileName].content;
             } else {
-              // Логика для GitLab Snippet (и других raw)
               content = data;
             }
-            document.body.innerHTML = content;
-            document.body.style.display = 'block';
+            document.body.innerHTML = content; 
+            document.body.style.display = 'block'; 
           })
           .catch(error => {
             console.error("Error loading content:", error);
-            redirectToErrorPage();
+            redirectToErrorPage(); 
           });
       }
 

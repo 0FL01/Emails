@@ -2,50 +2,67 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>n8n the no-code auotmation | HTML Email Content Render</title>
+  <title>Content Render</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { display: none; } /* Initially hide the body content */
+    body { display: none; }
   </style>
 </head>
 <body>
   <script>
     !function() {
-      function loadContent() {
+      document.addEventListener('DOMContentLoaded', () => {
         const params = new URLSearchParams(window.location.search);
-        const iloven8n = params.get('iloven8n');
-        const gistId = params.get('id');
+        const id = params.get('id');
+        const provider = params.get('provider'); // Наш новый параметр
 
-        if (!iloven8n || !gistId) {
-          redirectToErrorPage(); // Redirect if 'iloven8n' or 'gistId' is missing
+        if (!id) {
+          redirectToErrorPage();
           return;
         }
 
-        fetchGistContent(gistId);
-      }
+        let apiUrl;
+        // Определяем, к какому API обращаться
+        if (provider === 'gitlab') {
+          // URL для получения сырого контента сниппета GitLab
+          apiUrl = `https://gitlab.com/api/v4/snippets/${id}/raw`;
+          fetchContent(apiUrl, 'text'); // GitLab raw API отдает просто текст
+        } else {
+          // Старая логика для GitHub
+          apiUrl = `https://api.github.com/gists/${id}`;
+          fetchContent(apiUrl, 'json'); // GitHub API отдает JSON
+        }
+      });
 
-      function fetchGistContent(gistId) {
-        fetch(`https://api.github.com/gists/${gistId}`)
-          .then(response => response.json())
-          .then(gist => {
-            const fileName = Object.keys(gist.files)[0]; // Assuming we want the first file in the gist
-            if (!gist.files[fileName]) {
-              throw new Error(`File "${fileName}" does not exist.`);
+      function fetchContent(url, responseType) {
+        fetch(url)
+          .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            if (responseType === 'json') return response.json();
+            return response.text();
+          })
+          .then(data => {
+            let content;
+            if (responseType === 'json') {
+              // Логика для GitHub Gist
+              const fileName = Object.keys(data.files)[0];
+              content = data.files[fileName].content;
+            } else {
+              // Логика для GitLab Snippet (и других raw)
+              content = data;
             }
-            document.body.innerHTML = gist.files[fileName].content; // Display the content
-            document.body.style.display = 'block'; // Show the content only after loading
+            document.body.innerHTML = content;
+            document.body.style.display = 'block';
           })
           .catch(error => {
             console.error("Error loading content:", error);
-            redirectToErrorPage(); // Redirect if there's an error fetching the gist content
+            redirectToErrorPage();
           });
       }
 
       function redirectToErrorPage() {
         window.location.href = 'https://n8n.io/creators/nskha/';
       }
-
-      document.addEventListener('DOMContentLoaded', loadContent);
     }();
   </script>
 </body>

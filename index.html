@@ -23,18 +23,18 @@
 
         let apiUrl;
         if (provider === 'gitlab') {
-          apiUrl = `https://gitlab.com/-/snippets/${id}/raw/main/email.html`;
+          apiUrl = `https://gitlab.com/-/snippets/${id}/raw`;
           fetchContent(apiUrl, 'text'); 
         } else {
           apiUrl = `https://api.github.com/gists/${id}`;
-          fetchContent(apiUrl, 'json'); 
+          fetchContent(apiUrl, 'json');
         }
       });
 
       function fetchContent(url, responseType) {
         fetch(url)
           .then(response => {
-            if (!response.ok) throw new Error('Network response was not ok');
+            if (!response.ok) throw new Error(`Network response was not ok. Status: ${response.status}`);
             return responseType === 'json' ? response.json() : response.text();
           })
           .then(data => {
